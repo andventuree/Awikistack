@@ -30,6 +30,12 @@ app.get('/', (req,res,next)=>{
   res.render('index');
 });
 
+//express logging middle-ware
+app.use((err,req,res,next)=>{
+  console.log(err);
+  res.status(500).send(err.message);
+})
+
 User.sync() //user table synced
   .then(function(){
     return Page.sync(); //then page table syncs

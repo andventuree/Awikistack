@@ -9,6 +9,7 @@ const sequelize = require('sequelize');
 const models = require('./models');
 const Page = models.Page;
 const User = models.User;
+const db = models.db;
 const wikiRoutes = require('./routes/wiki.js');
 const userRoutes = require('./routes/users.js')
 
@@ -41,12 +42,22 @@ app.use((err,req,res,next)=>{
   res.status(500).send(err.message);
 })
 
-User.sync() //user table synced
-  .then(function(){
-    return Page.sync(); //then page table syncs
-  })
-  .then(function(){
-    app.listen(4000, ()=>{ console.log('server 4000 started')}) //only after syncing db, do you start server
-  });
+// User.sync() //user table synced
+//   .then(function(){
+//     return Page.sync(); //then page table syncs
+//   })
+//   .then(function(){
+//     app.listen(4000, ()=>{ console.log('server 4000 started')}) //only after syncing db, do you start server
+//   });
+
+db.sync() //syncs both tables at once! // add {force:true} in parens to drop tables!
+.then(()=>{
+  console.log('tables sycned');
+})
+.then(function(){
+  app.listen(4000, ()=>{ console.log('server 4000 started')}) //only after syncing db, do you start server
+});
+
+
 
 

@@ -20,6 +20,16 @@ router.get('/', (req,res,next)=>{
 
 });
 
+router.get('/search/:tag', (req,rest,next)=>{
+  Page.findByTag(req.params.tag) //look into these query methods to understand each parameter
+  .then((pages)=>{
+    res.render('index', {
+      pages: pages
+    });
+  })
+  .catch(next);
+})
+
 // POST /wiki/
 router.post('/', (req,res,next)=>{
 
@@ -45,10 +55,15 @@ router.post('/', (req,res,next)=>{
     //   var user = values[0];
     // })
     .spread((user, userWasCreatedBool)=>{ //spread out the returned above from above //from bluebird NPM
+      var splitTags = req.body.tags.split(',').map((eachTag)=>{
+        return eachTag.trim();
+      });
+
       return Page.create({
         title: req.body.title,
         content: req.body.content,
-        status: req.body.status
+        status: req.body.status,
+        tags: splitTags
       }).then((createdPage)=>{
         return createdPage.setAuthor(user); //.setAuthor relationship method comes from Page.belongsTo model
         //this method is async because it touches database
@@ -93,7 +108,8 @@ router.get('/:urlTitle', (req,res,next)=>{
           // console.log(req.body);
           // console.log(singlePage);
           res.render('wikipage',{
-            page : singlePage
+            page : singlePage,
+            // tags : tag //we need to feedin tags so this can even display
           })
         })
 
@@ -113,4 +129,22 @@ router.get('/:urlTitle', (req,res,next)=>{
 //       console.log('Page was saved successfully!');
 //     });
 
-
+router.get('/:urlTitle/similar', (req,res,next)=>{
+  Page.findOne({
+    where: {
+      urlTitle: req.params.urlTitle
+    }
+  })
+  .then((page)=>{
+    if(page === null){
+      return next(new Error('That page was not found!'));
+    }
+    return page.findSimilar() // not a virtual or hook so it needs to be called
+  })
+  .then((similarPages) =>{
+    res.render('index', {
+      pages: similarPages
+    })
+  })
+  .catch(next);
+})

@@ -21,6 +21,20 @@ const Page = db.define('page', {
   status: {
       type: Sequelize.ENUM('open', 'closed')
   }
+}, { //hooks and virtuals go into this options argument
+  hooks: { //our html form doesn't have a urlTitle prop so you'll need to make one //will get nullNotAllowed error otherwise
+    beforeValidate: function(page){ //we receive the instance itself as the argument
+      if(page.title){
+        // console.log(page.title.replace(/\s+/g, '_').replace(/\W/g, ''))
+        page.urlTitle = page.title.replace(/\s+/g, '_').replace(/\W/g, '');
+      }
+    }
+  },
+  getterMethods: {
+    route: function(){
+      return '/wiki/' + this.urlTitle;
+    }
+  }
 });
 
 const User = db.define('user', {
@@ -37,6 +51,9 @@ const User = db.define('user', {
       }
   }
 });
+
+Page.belongsTo(User, { as: 'author' });
+
 
 module.exports = {
   db: db,

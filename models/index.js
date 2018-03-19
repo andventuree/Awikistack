@@ -5,7 +5,7 @@ const db = new Sequelize('postgres://localhost:5432/wikistack', {
   logging: false //setting false logging doesn't log what DB .sync({force:true}) and other DB things
 });
 
-let Page = db.define('page', {
+let Page = db.define('page', { //this is second arg that defines schema
   title: {
     type: Sequelize.STRING,
     allowNull: false,
@@ -26,13 +26,13 @@ let Page = db.define('page', {
     defaultValue: Sequelize.NOW //don't need to add yourself then
   }
 }, {
-  getterMethods: {
+  getterMethods: { //dont need to call them and can be accessed as properties
     route: function(){
       // console.log('/wiki/' + this.getDataValue('title'))
       return '/wiki/' + this.urlTitle;
     }
   },
-  hook: {
+  hooks: { //executes in between life cycle events
     beforeValidate: function (page) {
       if (page.title) {
         page.urlTitle = page.title.replace(/\s/g, '_').replace(/\W/g, '');
@@ -43,17 +43,6 @@ let Page = db.define('page', {
     }
   }
 })
-
-function generateUrlTitle (title) {
-  if (title) {
-    // Removes all non-alphanumeric characters from title
-    // And make whitespace underscore
-    return title.replace(/\s+/g, '_').replace(/\W/g, '');
-  } else {
-    // Generates random 5 letter string
-    return Math.random().toString(36).substring(2, 7);
-  }
-}
 
 let User = db.define('user', {
   name: {

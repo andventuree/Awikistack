@@ -13,12 +13,6 @@ const routes = require('./routes');
 //logging middle-ware
 app.use(morgan('dev'));
 
-//express logging middle-ware
-app.use((err,req,res,next)=>{
-  console.log(err.stack);
-  res.status(err.status|| 500).send(err);
-})
-
 //bodyParsing for incoming string information from broswer
 app.use(bodyParser.urlencoded({extended: true})) //parsing string from browser
 app.use(bodyParser.json()) //in case info is sent in json form
@@ -46,13 +40,14 @@ app.get('/', (req,res,next)=>{
 //routing paths going out to each router
 app.use('/', routes);
 
-// models.Page.sync() //this would also work
-// .then(()=>{
-//   models.User.sync() //but would sync each table 1 by 1
-// })
+//express logging middle-ware
+app.use((err,req,res,next)=>{
+  console.log(err.stack);
+  res.status(err.status|| 500).send(err);
+})
 
 
-models.db.sync({force: true})
+models.db.sync( ) //{force: true}
 .then(()=>{
   console.log('wikistack database is connected')
 })
@@ -64,3 +59,8 @@ models.db.sync({force: true})
   // next(err);
 // }
 );
+
+// models.Page.sync() //this would also work
+// .then(()=>{
+//   models.User.sync() //but would sync each table 1 by 1
+// })
